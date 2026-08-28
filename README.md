@@ -40,6 +40,11 @@ API RESTful desenvolvida em Java com Spring Boot para gerenciamento e agendament
 4. **Testar os Endpoints:**
    Acesse a interface do Swagger no navegador ou importe as requisições no Insomnia.
 
+## 📚 Bibliografia
+* Documentação Spring Boot
+* StackOverflow
+* Gemini
+
 ## 👥 Autores
 
 * **Eduardo Artigiani Lima Tribst** - [GitHub](https://github.com/EduardoTribst)
