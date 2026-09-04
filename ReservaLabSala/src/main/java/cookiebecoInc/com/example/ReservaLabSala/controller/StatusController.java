@@ -33,7 +33,7 @@ public class StatusController {
             Status status = statusDTO.mapearDadosParaEntidadeStatus();
             statusValidator.validar(status);
             statusRepository.save(status);
-            return new ResponseEntity<>("Status inserido com sucesso! " + statusDTO, HttpStatus.CREATED);
+            return new ResponseEntity<>("Status inserido com sucesso! ", HttpStatus.CREATED);
         } catch (RegistroDuplicadoException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErroResposta(HttpStatus.CONFLICT.value(), e.getMessage()));
         }

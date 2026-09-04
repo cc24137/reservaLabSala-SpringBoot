@@ -10,12 +10,15 @@ import java.time.LocalTime;
 import java.util.List;
 
 public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
-
-    List<Reserva> findByUsuario(Usuario usuario);
-
-    List<Reserva> findByStatus(Status status);
-
+    List<Reserva> findByUsuarioId(Integer usuarioId);
+    List<Reserva> findByStatusId(Integer statusId);
+    List<Reserva> findByLaboratorioId(Integer laboratorioId);
+    List<Reserva> findBySalaId(Integer salaId);
+    List<Reserva> findByDataInicio(LocalDate dataInicio);
+    List<Reserva> findByHoraInicio(LocalTime horaInicio);
     List<Reserva> findByDataInicioAndHoraInicio(LocalDate dataInicio, LocalTime horaInicio);
+    List<Reserva> findByStatusNomeIgnoreCase(String statusNome);
 
-    List<Reserva> findByDataInicioBetween(LocalDate dataInicio, LocalDate dataFim);
+    List<Reserva> findByUsuarioIdAndStatusId(Integer usuarioId, String statusNome);
+    List<Reserva> findByUsuarioIdAndStatusIdAndDataInicio(Integer usuarioId, String statusNome, LocalDate dataInicio);
 }

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 
 public record StatusDTO(
         Integer id,
-        @NotBlank(message = "Campo Nome do Status é obrigatório")
+        @NotBlank(message = "Campo obrigatório")
         String nome
 ) {
     public Status mapearDadosParaEntidadeStatus() {

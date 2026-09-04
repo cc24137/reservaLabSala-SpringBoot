@@ -15,35 +15,31 @@ public class Reserva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "data_inicio")
+    @Column(name = "data_inicio", columnDefinition = "DATE")
     private LocalDate dataInicio;
 
-    @Column(name = "data_fim")
+    @Column(name = "data_fim", columnDefinition = "DATE")
     private LocalDate dataFim;
 
-    @Column(name = "hora_inicio")
+    @Column(name = "hora_inicio", columnDefinition = "TIME")
     private LocalTime horaInicio;
 
-    @Column(name = "hora_fim")
+    @Column(name = "hora_fim", columnDefinition = "TIME")
     private LocalTime horaFim;
 
     @ManyToOne
-        ( fetch = FetchType.EAGER )
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
     @ManyToOne
-        ( fetch = FetchType.EAGER )
     @JoinColumn(name = "status_id")
     private Status status;
 
     @ManyToOne
-        ( fetch = FetchType.EAGER )
     @JoinColumn(name = "laboratorio_id")
     private Laboratorio laboratorio;
 
     @ManyToOne
-        ( fetch = FetchType.EAGER )
     @JoinColumn(name = "sala_id")
     private Sala sala;
 }

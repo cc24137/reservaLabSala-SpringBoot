@@ -8,10 +8,13 @@ import cookiebecoInc.com.example.ReservaLabSala.model.*;
 import cookiebecoInc.com.example.ReservaLabSala.repository.*;
 import cookiebecoInc.com.example.ReservaLabSala.service.ReservaService;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -99,6 +102,34 @@ public class ReservaController {
     @GetMapping
     public ResponseEntity<List<ReservaDTO>> listarTodasReservas() {
         List<Reserva> resultado = reservaService.listarTodas();
+        List<ReservaDTO> lista = resultado.stream()
+                .map(r -> new ReservaDTO(
+                        r.getId(),
+                        r.getDataInicio(),
+                        r.getDataFim(),
+                        r.getHoraInicio(),
+                        r.getHoraFim(),
+                        r.getUsuario().getId(),
+                        r.getStatus().getId(),
+                        r.getLaboratorio() != null ? r.getLaboratorio().getId() : null,
+                        r.getSala() != null ? r.getSala().getId() : null
+                )).collect(Collectors.toList());
+
+        return ResponseEntity.ok(lista);
+    }
+
+    @GetMapping("/filtros")
+    public ResponseEntity<List<ReservaDTO>> pesquisarReservas(
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "usuarioId", required = false) Integer usuarioId,
+            @RequestParam(value = "laboratorioId", required = false) Integer laboratorioId,
+            @RequestParam(value = "salaId", required = false) Integer salaId,
+            @RequestParam(value = "dataInicio", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+            @RequestParam(value = "horaInicio", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime horaInicio) {
+
+        List<Reserva> resultado = reservaService.pesquisarPorFiltros(
+                usuarioId, status, laboratorioId, salaId, dataInicio, horaInicio);
+
         List<ReservaDTO> lista = resultado.stream()
                 .map(r -> new ReservaDTO(
                         r.getId(),

@@ -6,6 +6,8 @@ import cookiebecoInc.com.example.ReservaLabSala.repository.ReservaRepository;
 import cookiebecoInc.com.example.ReservaLabSala.validator.ReservaValidator;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,4 +53,48 @@ public class ReservaService {
     public List<Reserva> listarTodas() {
         return reservaRepository.findAll();
     }
+
+    public List<Reserva> pesquisarPorFiltros(
+            Integer usuarioId,
+            String statusNome,
+            Integer laboratorioId,
+            Integer salaId,
+            LocalDate dataInicio,
+            LocalTime horaInicio) {
+
+        if (usuarioId != null && statusNome != null && dataInicio != null) {
+            return reservaRepository.findByUsuarioIdAndStatusIdAndDataInicio(usuarioId, statusNome, dataInicio);
+        }
+
+        if (usuarioId != null && statusNome != null) {
+            return reservaRepository.findByUsuarioIdAndStatusId(usuarioId, statusNome);
+        }
+
+        if (usuarioId != null) {
+            return reservaRepository.findByUsuarioId(usuarioId);
+        }
+
+        if (statusNome != null && !statusNome.isBlank()) {
+            return reservaRepository.findByStatusNomeIgnoreCase(statusNome);
+        }
+
+        if (laboratorioId != null) {
+            return reservaRepository.findByLaboratorioId(laboratorioId);
+        }
+
+        if (salaId != null) {
+            return reservaRepository.findBySalaId(salaId);
+        }
+
+        if (dataInicio != null) {
+            return reservaRepository.findByDataInicio(dataInicio);
+        }
+
+        if (horaInicio != null) {
+            return reservaRepository.findByHoraInicio(horaInicio);
+        }
+
+        return reservaRepository.findAll();
+    }
+
 }
