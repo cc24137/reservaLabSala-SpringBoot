@@ -3,11 +3,12 @@ package cookiebecoInc.com.example.ReservaLabSala.service;
 import cookiebecoInc.com.example.ReservaLabSala.model.Usuario;
 import cookiebecoInc.com.example.ReservaLabSala.repository.UsuarioRepository;
 import cookiebecoInc.com.example.ReservaLabSala.validator.UsuarioValidator;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -15,40 +16,39 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final UsuarioValidator usuarioValidator;
 
-    public UsuarioService(
-            UsuarioRepository usuarioRepository,
-            UsuarioValidator usuarioValidator) {
+    public UsuarioService(UsuarioRepository usuarioRepository, UsuarioValidator usuarioValidator) {
         this.usuarioRepository = usuarioRepository;
         this.usuarioValidator = usuarioValidator;
     }
 
-    public Usuario inserirUsuario(Usuario usuario) {
+    public Usuario salvar(Usuario usuario) {
         usuarioValidator.validar(usuario);
         return usuarioRepository.save(usuario);
     }
 
-    public Optional<Usuario> pegarDadosUsuarioPorId(Integer id) {
-        return usuarioRepository.findById(id);
+    public List<Usuario> listarTodos() {
+        return usuarioRepository.findAll();
     }
 
-    public void excluirUsuarioPorId(Integer id) {
-        usuarioRepository.deleteById(id);
+    public Usuario buscarPorId(Integer id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Usuário não encontrado"));
     }
 
-    public Usuario atualizarUsuario(Usuario usuario) {
-        if (usuario.getId() == null) {
-            throw new IllegalArgumentException("Não existe USUÁRIO com o ID informado.");
+    public Usuario autenticar(String email, String senha) {
+        return usuarioRepository.findByEmailAndSenha(email, senha)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "E-mail ou senha incorretos"));
+    }
+
+    public List<Usuario> pesquisarPorFiltros(String cpf, String nome, String email, LocalDate dataAniversario) {
+        if (cpf != null && !cpf.isBlank()) {
+            return usuarioRepository.findByCpf(cpf).map(List::of).orElse(List.of());
         }
-        usuarioValidator.validar(usuario);
-        return usuarioRepository.save(usuario);
-    }
-
-    public List<Usuario> pesquisarPorEmailEDataAniversario(String email, LocalDate dataAniversario) {
-        if (email != null && dataAniversario != null) {
-            return usuarioRepository.findByEmailAndDataAniversario(email, dataAniversario);
-        }
-        if (email != null) {
+        if (email != null && !email.isBlank()) {
             return usuarioRepository.findByEmail(email).map(List::of).orElse(List.of());
+        }
+        if (nome != null && !nome.isBlank()) {
+            return usuarioRepository.findByNome(nome);
         }
         if (dataAniversario != null) {
             return usuarioRepository.findByDataAniversario(dataAniversario);

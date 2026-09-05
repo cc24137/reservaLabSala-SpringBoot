@@ -2,60 +2,53 @@ package cookiebecoInc.com.example.ReservaLabSala.service;
 
 import cookiebecoInc.com.example.ReservaLabSala.model.Laboratorio;
 import cookiebecoInc.com.example.ReservaLabSala.repository.LaboratorioRepository;
+import cookiebecoInc.com.example.ReservaLabSala.repository.StatusRecursoRepository;
 import cookiebecoInc.com.example.ReservaLabSala.validator.LaboratorioValidator;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class LaboratorioService {
 
     private final LaboratorioRepository laboratorioRepository;
+    private final StatusRecursoRepository statusRecursoRepository;
     private final LaboratorioValidator laboratorioValidator;
 
-    public LaboratorioService(
-            LaboratorioRepository laboratorioRepository,
-            LaboratorioValidator laboratorioValidator) {
+    public LaboratorioService(LaboratorioRepository laboratorioRepository,
+                              StatusRecursoRepository statusRecursoRepository,
+                              LaboratorioValidator laboratorioValidator) {
         this.laboratorioRepository = laboratorioRepository;
+        this.statusRecursoRepository = statusRecursoRepository;
         this.laboratorioValidator = laboratorioValidator;
     }
 
-    public Laboratorio inserirLaboratorio(Laboratorio laboratorio) {
+    public Laboratorio salvar(Laboratorio laboratorio) {
+        // Validação de duplicidade antes de salvar
         laboratorioValidator.validar(laboratorio);
+
+        if (laboratorio.getStatusRecurso() != null && laboratorio.getStatusRecurso().getId() != null) {
+            var status = statusRecursoRepository.findById(laboratorio.getStatusRecurso().getId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Status de recurso não encontrado"));
+            laboratorio.setStatusRecurso(status);
+        }
         return laboratorioRepository.save(laboratorio);
     }
 
-    public Optional<Laboratorio> pegarDadosLaboratorioPorId(Integer id) {
-        return laboratorioRepository.findById(id);
-    }
-
-    public void excluirLaboratorioPorId(Integer id) {
-        laboratorioRepository.deleteById(id);
-    }
-
-    public Laboratorio atualizarLaboratorio(Laboratorio laboratorio) {
-        if (laboratorio.getId() == null) {
-            throw new IllegalArgumentException("Não existe LABORATÓRIO com o ID informado.");
-        }
-        laboratorioValidator.validar(laboratorio);
-        return laboratorioRepository.save(laboratorio);
-    }
-
-    public List<Laboratorio> pesquisarPorNomeCapacidadeLocalizacao(
-            String nome, Integer capacidade, String localizacao) {
-
-        if (nome != null && capacidade != null && localizacao != null) {
-            return laboratorioRepository.findByNomeAndCapacidadeAndLocalizacao(nome, capacidade, localizacao);
-        }
-        if (nome != null) {
+    public List<Laboratorio> pesquisarPorFiltros(String nome, Integer capacidade, String localizacao, Integer statusRecursoId) {
+        if (nome != null && !nome.isBlank()) {
             return laboratorioRepository.findByNome(nome);
         }
         if (capacidade != null) {
             return laboratorioRepository.findByCapacidade(capacidade);
         }
-        if (localizacao != null) {
+        if (localizacao != null && !localizacao.isBlank()) {
             return laboratorioRepository.findByLocalizacao(localizacao);
+        }
+        if (statusRecursoId != null) {
+            return laboratorioRepository.findByStatusRecursoId(statusRecursoId);
         }
         return laboratorioRepository.findAll();
     }

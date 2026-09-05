@@ -10,25 +10,24 @@ import java.time.LocalDate;
 public class Usuario {
 
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "cpf", length = 14)
+    @Column(name = "cpf", nullable = false, length = 14, unique = true)
     private String cpf;
 
-    @Column(name = "nome", length = 100)
+    @Column(name = "nome", nullable = false, length = 80)
     private String nome;
 
-    @Column(name = "data_aniversario")
+    @Column(name = "data_aniversario", columnDefinition = "DATE")
     private LocalDate dataAniversario;
 
     @Column(name = "celular", length = 20)
     private String celular;
 
-    @Column(name = "email", length = 100)
+    @Column(name = "email", nullable = false, length = 80, unique = true)
     private String email;
 
-    @Column(name = "senha", length = 100)
+    @Column(name = "senha", nullable = false, length = 100)
     private String senha;
 }

@@ -1,44 +1,72 @@
 package cookiebecoInc.com.example.ReservaLabSala.validator;
 
-import cookiebecoInc.com.example.ReservaLabSala.exceptions.RegistroDuplicadoException;
+import cookiebecoInc.com.example.ReservaLabSala.model.Laboratorio;
 import cookiebecoInc.com.example.ReservaLabSala.model.Reserva;
-import cookiebecoInc.com.example.ReservaLabSala.repository.ReservaRepository;
+import cookiebecoInc.com.example.ReservaLabSala.model.Sala;
+import cookiebecoInc.com.example.ReservaLabSala.repository.LaboratorioRepository;
+import cookiebecoInc.com.example.ReservaLabSala.repository.SalaRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 @Component
 public class ReservaValidator {
 
-    private final ReservaRepository reservaRepository;
+    private final LaboratorioRepository laboratorioRepository;
+    private final SalaRepository salaRepository;
 
-    public ReservaValidator(ReservaRepository reservaRepository) {
-        this.reservaRepository = reservaRepository;
+    public ReservaValidator(LaboratorioRepository laboratorioRepository, SalaRepository salaRepository) {
+        this.laboratorioRepository = laboratorioRepository;
+        this.salaRepository = salaRepository;
     }
 
     public void validar(Reserva reserva) {
-        if (existeReservaConflitante(reserva)) {
-            throw new RegistroDuplicadoException("Já existe uma reserva cadastrada para essa mesma data e horário");
+        if (!isReservaDiaria(reserva)) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "A reserva é diária/por dia");
+        }
+
+        if (!isHorarioValido(reserva)) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Hora Final precisa ser maior ou igual à Hora Inicial");
+        }
+
+        if (isRecursoBloqueado(reserva)) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Recurso bloqueado para manutenção");
         }
     }
 
-    private boolean existeReservaConflitante(Reserva reserva) {
-        List<Reserva> reservasEncontradas = reservaRepository.findByDataInicioAndHoraInicio(
-                reserva.getDataInicio(),
-                reserva.getHoraInicio()
-        );
+    public void validarCancelamento(Reserva reserva) {
+        LocalDateTime inicioReserva = LocalDateTime.of(reserva.getDataInicio(), reserva.getHoraInicio());
+        LocalDateTime agora = LocalDateTime.now();
 
-        if (reservasEncontradas.isEmpty()) {
-            return false;
+        if (Duration.between(agora, inicioReserva).toHours() < 24) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "O cancelamento só pode ocorrer até 24 horas antes do início");
+        }
+    }
+
+    private boolean isReservaDiaria(Reserva reserva) {
+        return reserva.getDataInicio().equals(reserva.getDataFim());
+    }
+
+    private boolean isHorarioValido(Reserva reserva) {
+        return reserva.getHoraFim().isAfter(reserva.getHoraInicio());
+    }
+
+    private boolean isRecursoBloqueado(Reserva reserva) {
+        if (reserva.getLaboratorio() != null && reserva.getLaboratorio().getId() != null) {
+            Laboratorio lab = laboratorioRepository.findById(reserva.getLaboratorio().getId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Laboratório não encontrado"));
+            return lab.getStatusRecurso() != null && "Bloqueado".equalsIgnoreCase(lab.getStatusRecurso().getNome());
         }
 
-        Reserva reservaEncontrada = reservasEncontradas.get(0);
-
-        if (reserva.getId() == null) {
-            return true;
+        if (reserva.getSala() != null && reserva.getSala().getId() != null) {
+            Sala sala = salaRepository.findById(reserva.getSala().getId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Sala não encontrada"));
+            return sala.getStatusRecurso() != null && "Bloqueado".equalsIgnoreCase(sala.getStatusRecurso().getNome());
         }
 
-        return !reserva.getId().equals(reservaEncontrada.getId());
+        return false;
     }
 }
-

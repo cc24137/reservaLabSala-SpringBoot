@@ -1,9 +1,10 @@
 package cookiebecoInc.com.example.ReservaLabSala.validator;
 
-import cookiebecoInc.com.example.ReservaLabSala.exceptions.RegistroDuplicadoException;
 import cookiebecoInc.com.example.ReservaLabSala.model.Usuario;
 import cookiebecoInc.com.example.ReservaLabSala.repository.UsuarioRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -17,19 +18,31 @@ public class UsuarioValidator {
     }
 
     public void validar(Usuario usuario) {
-        if (existeUsuarioCadastrado(usuario)) {
-            throw new RegistroDuplicadoException("Usuário já cadastrado com este e-mail");
+        if (existeCpfCadastrado(usuario)) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "CPF já cadastrado");
+        }
+        if (existeEmailCadastrado(usuario)) {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "E-mail já cadastrado");
         }
     }
 
-    private boolean existeUsuarioCadastrado(Usuario usuario) {
+    private boolean existeCpfCadastrado(Usuario usuario) {
+        Optional<Usuario> usuarioEncontrado = usuarioRepository.findByCpf(usuario.getCpf());
+
+        if (usuario.getId() == null) {
+            return usuarioEncontrado.isPresent();
+        }
+
+        return usuarioEncontrado.isPresent() && !usuario.getId().equals(usuarioEncontrado.get().getId());
+    }
+
+    private boolean existeEmailCadastrado(Usuario usuario) {
         Optional<Usuario> usuarioEncontrado = usuarioRepository.findByEmail(usuario.getEmail());
 
         if (usuario.getId() == null) {
             return usuarioEncontrado.isPresent();
         }
 
-        return usuarioEncontrado.isPresent() &&
-                !usuario.getId().equals(usuarioEncontrado.get().getId());
+        return usuarioEncontrado.isPresent() && !usuario.getId().equals(usuarioEncontrado.get().getId());
     }
 }

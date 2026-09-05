@@ -2,6 +2,8 @@ package cookiebecoInc.com.example.ReservaLabSala.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -11,29 +13,30 @@ import java.time.LocalTime;
 public class Reserva {
 
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "data_inicio", columnDefinition = "DATE")
+    @Column(name = "data_inicio", nullable = false, columnDefinition = "DATE")
     private LocalDate dataInicio;
 
-    @Column(name = "data_fim", columnDefinition = "DATE")
+    @Column(name = "data_fim", nullable = false, columnDefinition = "DATE")
     private LocalDate dataFim;
 
-    @Column(name = "hora_inicio", columnDefinition = "TIME")
+    @JdbcTypeCode(SqlTypes.TIME)
+    @Column(name = "hora_inicio", nullable = false, columnDefinition = "TIME")
     private LocalTime horaInicio;
 
-    @Column(name = "hora_fim", columnDefinition = "TIME")
+    @JdbcTypeCode(SqlTypes.TIME)
+    @Column(name = "hora_fim", nullable = false, columnDefinition = "TIME")
     private LocalTime horaFim;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_id")
+    @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
     @ManyToOne
-    @JoinColumn(name = "status_id")
-    private Status status;
+    @JoinColumn(name = "status_reserva_id", nullable = false)
+    private StatusReserva statusReserva;
 
     @ManyToOne
     @JoinColumn(name = "laboratorio_id")

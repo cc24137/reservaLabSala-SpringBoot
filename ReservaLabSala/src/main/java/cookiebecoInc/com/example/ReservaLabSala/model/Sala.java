@@ -9,16 +9,19 @@ import lombok.Data;
 public class Sala {
 
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "nome", length = 80)
+    @Column(name = "nome", nullable = false, length = 80)
     private String nome;
 
-    @Column(name = "capacidade")
+    @Column(name = "capacidade", nullable = false)
     private Integer capacidade;
 
-    @Column(name = "localizacao", length = 50)
+    @Column(name = "localizacao", nullable = false, length = 50)
     private String localizacao;
+
+    @ManyToOne
+    @JoinColumn(name = "status_recurso_id")
+    private StatusRecurso statusRecurso;
 }

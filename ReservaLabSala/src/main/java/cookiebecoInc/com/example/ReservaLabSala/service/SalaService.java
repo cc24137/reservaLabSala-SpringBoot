@@ -2,60 +2,53 @@ package cookiebecoInc.com.example.ReservaLabSala.service;
 
 import cookiebecoInc.com.example.ReservaLabSala.model.Sala;
 import cookiebecoInc.com.example.ReservaLabSala.repository.SalaRepository;
+import cookiebecoInc.com.example.ReservaLabSala.repository.StatusRecursoRepository;
 import cookiebecoInc.com.example.ReservaLabSala.validator.SalaValidator;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SalaService {
 
     private final SalaRepository salaRepository;
+    private final StatusRecursoRepository statusRecursoRepository;
     private final SalaValidator salaValidator;
 
-    public SalaService(
-            SalaRepository salaRepository,
-            SalaValidator salaValidator) {
+    public SalaService(SalaRepository salaRepository,
+                       StatusRecursoRepository statusRecursoRepository,
+                       SalaValidator salaValidator) {
         this.salaRepository = salaRepository;
+        this.statusRecursoRepository = statusRecursoRepository;
         this.salaValidator = salaValidator;
     }
 
-    public Sala inserirSala(Sala sala) {
+    public Sala salvar(Sala sala) {
+        // Validação de duplicidade antes de salvar
         salaValidator.validar(sala);
+
+        if (sala.getStatusRecurso() != null && sala.getStatusRecurso().getId() != null) {
+            var status = statusRecursoRepository.findById(sala.getStatusRecurso().getId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Status de recurso não encontrado"));
+            sala.setStatusRecurso(status);
+        }
         return salaRepository.save(sala);
     }
 
-    public Optional<Sala> pegarDadosSalaPorId(Integer id) {
-        return salaRepository.findById(id);
-    }
-
-    public void excluirSalaPorId(Integer id) {
-        salaRepository.deleteById(id);
-    }
-
-    public Sala atualizarSala(Sala sala) {
-        if (sala.getId() == null) {
-            throw new IllegalArgumentException("Não existe SALA com o ID informado.");
-        }
-        salaValidator.validar(sala);
-        return salaRepository.save(sala);
-    }
-
-    public List<Sala> pesquisarPorNomeCapacidadeLocalizacao(
-            String nome, Integer capacidade, String localizacao) {
-
-        if (nome != null && capacidade != null && localizacao != null) {
-            return salaRepository.findByNomeAndCapacidadeAndLocalizacao(nome, capacidade, localizacao);
-        }
-        if (nome != null) {
+    public List<Sala> pesquisarPorFiltros(String nome, Integer capacidade, String localizacao, Integer statusRecursoId) {
+        if (nome != null && !nome.isBlank()) {
             return salaRepository.findByNome(nome);
         }
         if (capacidade != null) {
             return salaRepository.findByCapacidade(capacidade);
         }
-        if (localizacao != null) {
+        if (localizacao != null && !localizacao.isBlank()) {
             return salaRepository.findByLocalizacao(localizacao);
+        }
+        if (statusRecursoId != null) {
+            return salaRepository.findByStatusRecursoId(statusRecursoId);
         }
         return salaRepository.findAll();
     }

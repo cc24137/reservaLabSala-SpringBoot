@@ -8,10 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
-
+    Optional<Usuario> findByCpf(String cpf);
     Optional<Usuario> findByEmail(String email);
-
+    Optional<Usuario> findByEmailAndSenha(String email, String senha);
+    List<Usuario> findByNome(String nome);
     List<Usuario> findByDataAniversario(LocalDate dataAniversario);
-
-    List<Usuario> findByEmailAndDataAniversario(String email, LocalDate dataAniversario);
 }
