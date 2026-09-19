@@ -1,10 +1,9 @@
 package cookiebecoInc.com.example.ReservaLabSala.validator;
 
+import cookiebecoInc.com.example.ReservaLabSala.exceptions.RegistroDuplicadoException;
 import cookiebecoInc.com.example.ReservaLabSala.model.Usuario;
 import cookiebecoInc.com.example.ReservaLabSala.repository.UsuarioRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -19,10 +18,10 @@ public class UsuarioValidator {
 
     public void validar(Usuario usuario) {
         if (existeCpfCadastrado(usuario)) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "CPF já cadastrado");
+            throw new RegistroDuplicadoException("CPF já cadastrado no sistema");
         }
         if (existeEmailCadastrado(usuario)) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "E-mail já cadastrado");
+            throw new RegistroDuplicadoException("E-mail já cadastrado no sistema");
         }
     }
 

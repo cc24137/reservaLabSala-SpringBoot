@@ -29,7 +29,15 @@ public class ReservaController {
         return ResponseEntity.status(HttpStatus.CREATED).body(converterParaDTO(criada));
     }
 
-    @PatchMapping("/{id}/cancelar")
+    @PutMapping("/{id}")
+    public ResponseEntity<ReservaDTO> atualizar(@PathVariable Integer id, @RequestBody @Valid ReservaDTO dto) {
+        Reserva reserva = dto.mapearDadosParaEntidadeReserva();
+        reserva.setId(id);
+        Reserva atualizada = reservaService.salvar(reserva);
+        return ResponseEntity.ok(converterParaDTO(atualizada));
+    }
+
+    @PutMapping("/{id}/cancelar")
     public ResponseEntity<Void> cancelar(@PathVariable Integer id) {
         reservaService.cancelarReserva(id);
         return ResponseEntity.noContent().build();
@@ -37,14 +45,17 @@ public class ReservaController {
 
     @GetMapping
     public ResponseEntity<List<ReservaDTO>> pesquisarReservas(
-            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Integer statusId,
             @RequestParam(required = false) Integer usuarioId,
             @RequestParam(required = false) Integer laboratorioId,
             @RequestParam(required = false) Integer salaId,
+            @RequestParam(required = false) String recursoNome,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.TIME) LocalTime horaInicio) {
 
-        List<ReservaDTO> resultado = reservaService.pesquisarPorFiltros(status, usuarioId, laboratorioId, salaId, dataInicio, horaInicio)
+        List<ReservaDTO> resultado = reservaService.pesquisarPorFiltros(
+                        statusId, usuarioId, laboratorioId, salaId, recursoNome, dataInicio, dataFim, horaInicio)
                 .stream()
                 .map(this::converterParaDTO)
                 .toList();

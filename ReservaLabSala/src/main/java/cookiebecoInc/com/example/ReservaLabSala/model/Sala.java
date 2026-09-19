@@ -22,6 +22,6 @@ public class Sala {
     private String localizacao;
 
     @ManyToOne
-    @JoinColumn(name = "status_recurso_id")
+    @JoinColumn(name = "status_recurso_id", nullable = "false")
     private StatusRecurso statusRecurso;
 }

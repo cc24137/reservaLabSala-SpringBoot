@@ -26,7 +26,6 @@ public class LaboratorioService {
     }
 
     public Laboratorio salvar(Laboratorio laboratorio) {
-        // Validação de duplicidade antes de salvar
         laboratorioValidator.validar(laboratorio);
 
         if (laboratorio.getStatusRecurso() != null && laboratorio.getStatusRecurso().getId() != null) {
@@ -38,18 +37,6 @@ public class LaboratorioService {
     }
 
     public List<Laboratorio> pesquisarPorFiltros(String nome, Integer capacidade, String localizacao, Integer statusRecursoId) {
-        if (nome != null && !nome.isBlank()) {
-            return laboratorioRepository.findByNome(nome);
-        }
-        if (capacidade != null) {
-            return laboratorioRepository.findByCapacidade(capacidade);
-        }
-        if (localizacao != null && !localizacao.isBlank()) {
-            return laboratorioRepository.findByLocalizacao(localizacao);
-        }
-        if (statusRecursoId != null) {
-            return laboratorioRepository.findByStatusRecursoId(statusRecursoId);
-        }
-        return laboratorioRepository.findAll();
+        return laboratorioRepository.pesquisarComFiltros(nome, capacidade, localizacao, statusRecursoId);
     }
 }

@@ -8,7 +8,7 @@ public record StatusReservaDTO(
         Integer id,
 
         @NotBlank(message = "Campo obrigatório")
-        @Size(min = 3, max = 20, message = "Quantidade de caracteres incorreta!")
+        @Size(min = 15, max = 20, message = "Quantidade de caracteres incorreta!")
         String nome
 ) {
     public StatusReserva mapearDadosParaEntidadeStatusReserva() {

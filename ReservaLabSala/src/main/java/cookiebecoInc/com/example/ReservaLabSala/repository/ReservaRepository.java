@@ -2,17 +2,64 @@ package cookiebecoInc.com.example.ReservaLabSala.repository;
 
 import cookiebecoInc.com.example.ReservaLabSala.model.Reserva;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
 public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
-    List<Reserva> findByUsuarioId(Integer usuarioId);
-    List<Reserva> findByStatusReservaId(Integer statusReservaId);
-    List<Reserva> findByLaboratorioId(Integer laboratorioId);
-    List<Reserva> findBySalaId(Integer salaId);
-    List<Reserva> findByDataInicio(LocalDate dataInicio);
-    List<Reserva> findByHoraInicio(LocalTime horaInicio);
-    List<Reserva> findByStatusReservaNome(String nomeStatus);
+
+    @Query("SELECT r FROM Reserva r WHERE " +
+            "(:statusId IS NULL OR r.statusReserva.id = :statusId) AND " +
+            "(:usuarioId IS NULL OR r.usuario.id = :usuarioId) AND " +
+            "(:laboratorioId IS NULL OR r.laboratorio.id = :laboratorioId) AND " +
+            "(:salaId IS NULL OR r.sala.id = :salaId) AND " +
+            "(:recursoNome IS NULL OR LOWER(r.laboratorio.nome) LIKE LOWER(CONCAT('%', :recursoNome, '%')) OR LOWER(r.sala.nome) LIKE LOWER(CONCAT('%', :recursoNome, '%'))) AND " +
+            "(:dataInicio IS NULL OR r.dataInicio >= :dataInicio) AND " +
+            "(:dataFim IS NULL OR r.dataFim <= :dataFim) AND " +
+            "(:horaInicio IS NULL OR r.horaInicio >= :horaInicio)")
+    List<Reserva> pesquisarComFiltros(
+            @Param("statusId") Integer statusId,
+            @Param("usuarioId") Integer usuarioId,
+            @Param("laboratorioId") Integer laboratorioId,
+            @Param("salaId") Integer salaId,
+            @Param("recursoNome") String recursoNome,
+            @Param("dataInicio") LocalDate dataInicio,
+            @Param("dataFim") LocalDate dataFim,
+            @Param("horaInicio") LocalTime horaInicio
+    );
+
+    // Verifica sobreposição de horário para Laboratórios (ignorando reservas canceladas)
+    @Query("SELECT r FROM Reserva r WHERE " +
+            "r.laboratorio.id = :laboratorioId AND " +
+            "(:idReserva IS NULL OR r.id != :idReserva) AND " +
+            "r.statusReserva.nome != 'CANCELADA' AND " +
+            "(r.dataInicio <= :dataFim AND r.dataFim >= :dataInicio) AND " +
+            "(r.horaInicio < :horaFim AND r.horaFim > :horaInicio)")
+    List<Reserva> buscarConflitosLaboratorio(
+            @Param("laboratorioId") Integer laboratorioId,
+            @Param("dataInicio") LocalDate dataInicio,
+            @Param("dataFim") LocalDate dataFim,
+            @Param("horaInicio") LocalTime horaInicio,
+            @Param("horaFim") LocalTime horaFim,
+            @Param("idReserva") Integer idReserva
+    );
+
+    // Verifica sobreposição de horário para Salas (ignorando reservas canceladas)
+    @Query("SELECT r FROM Reserva r WHERE " +
+            "r.sala.id = :salaId AND " +
+            "(:idReserva IS NULL OR r.id != :idReserva) AND " +
+            "r.statusReserva.nome != 'CANCELADA' AND " +
+            "(r.dataInicio <= :dataFim AND r.dataFim >= :dataInicio) AND " +
+            "(r.horaInicio < :horaFim AND r.horaFim > :horaInicio)")
+    List<Reserva> buscarConflitosSala(
+            @Param("salaId") Integer salaId,
+            @Param("dataInicio") LocalDate dataInicio,
+            @Param("dataFim") LocalDate dataFim,
+            @Param("horaInicio") LocalTime horaInicio,
+            @Param("horaFim") LocalTime horaFim,
+            @Param("idReserva") Integer idReserva
+    );
 }

@@ -35,6 +35,30 @@ public record ReservaDTO(
 
         Integer salaId
 ) {
+
+    @AssertTrue(message = "Data Final precisa ser maior ou igual à Data Inicial")
+    public boolean isDataFimValida() {
+        if (dataInicio == null || dataFim == null) return true;
+        return !dataFim.isBefore(dataInicio);
+    }
+
+    @AssertTrue(message = "A reserva é diária/por dia")
+    public boolean isReservaDiaria() {
+        if (dataInicio == null || dataFim == null) return true;
+        return dataInicio.isEqual(dataFim);
+    }
+
+    @AssertTrue(message = "Hora Final precisa ser maior ou igual à Hora Inicial")
+    public boolean isHoraFimValida() {
+        if (horaInicio == null || horaFim == null) return true;
+        return horaFim.isAfter(horaInicio);
+    }
+
+    @AssertTrue(message = "Informe exatamente um recurso: Laboratório ou Sala")
+    public boolean isRecursoValido() {
+        return (laboratorioId != null && salaId == null) || (laboratorioId == null && salaId != null);
+    }
+
     public Reserva mapearDadosParaEntidadeReserva() {
         Reserva reserva = new Reserva();
         reserva.setId(this.id);

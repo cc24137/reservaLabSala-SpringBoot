@@ -12,6 +12,6 @@ public class StatusReserva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "nome", nullable = false, length = 20)
+    @Column(name = "nome", nullable = false, length = 20, unique = true)
     private String nome;
 }

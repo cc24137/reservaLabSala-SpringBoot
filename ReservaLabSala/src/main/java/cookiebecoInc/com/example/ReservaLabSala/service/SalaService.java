@@ -26,7 +26,6 @@ public class SalaService {
     }
 
     public Sala salvar(Sala sala) {
-        // Validação de duplicidade antes de salvar
         salaValidator.validar(sala);
 
         if (sala.getStatusRecurso() != null && sala.getStatusRecurso().getId() != null) {
@@ -38,18 +37,6 @@ public class SalaService {
     }
 
     public List<Sala> pesquisarPorFiltros(String nome, Integer capacidade, String localizacao, Integer statusRecursoId) {
-        if (nome != null && !nome.isBlank()) {
-            return salaRepository.findByNome(nome);
-        }
-        if (capacidade != null) {
-            return salaRepository.findByCapacidade(capacidade);
-        }
-        if (localizacao != null && !localizacao.isBlank()) {
-            return salaRepository.findByLocalizacao(localizacao);
-        }
-        if (statusRecursoId != null) {
-            return salaRepository.findByStatusRecursoId(statusRecursoId);
-        }
-        return salaRepository.findAll();
+        return salaRepository.pesquisarComFiltros(nome, capacidade, localizacao, statusRecursoId);
     }
 }

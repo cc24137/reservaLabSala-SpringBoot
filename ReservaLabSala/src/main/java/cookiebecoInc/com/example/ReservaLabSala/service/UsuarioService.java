@@ -41,18 +41,6 @@ public class UsuarioService {
     }
 
     public List<Usuario> pesquisarPorFiltros(String cpf, String nome, String email, LocalDate dataAniversario) {
-        if (cpf != null && !cpf.isBlank()) {
-            return usuarioRepository.findByCpf(cpf).map(List::of).orElse(List.of());
-        }
-        if (email != null && !email.isBlank()) {
-            return usuarioRepository.findByEmail(email).map(List::of).orElse(List.of());
-        }
-        if (nome != null && !nome.isBlank()) {
-            return usuarioRepository.findByNome(nome);
-        }
-        if (dataAniversario != null) {
-            return usuarioRepository.findByDataAniversario(dataAniversario);
-        }
-        return usuarioRepository.findAll();
+        return usuarioRepository.pesquisarComFiltros(cpf, nome, email, dataAniversario);
     }
 }

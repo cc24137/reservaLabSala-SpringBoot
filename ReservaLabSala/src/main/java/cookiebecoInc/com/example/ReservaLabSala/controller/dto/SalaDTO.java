@@ -24,6 +24,7 @@ public record SalaDTO(
         @Size(min = 15, max = 50, message = "Quantidade de caracteres incorreta!")
         String localizacao,
 
+        @NotNull(message = "Campo obrigatório")
         Integer statusRecursoId
 ) {
     public Sala mapearDadosParaEntidadeSala() {

@@ -39,53 +39,43 @@ public class ReservaService {
         Reserva reserva = reservaRepository.findById(reservaId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Reserva não encontrada"));
 
-        // validação da janela de 24h delegada para o validator
         reservaValidator.validarCancelamento(reserva);
 
-        StatusReserva statusCancelado = statusReservaRepository.findByNome("Cancelada")
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Status Cancelada não encontrado"));
+        StatusReserva statusCancelado = statusReservaRepository.findByNome("CANCELADA")
+                .orElseGet(() -> statusReservaRepository.findByNome("Cancelada")
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Status Cancelada não encontrado")));
 
         reserva.setStatusReserva(statusCancelado);
         reservaRepository.save(reserva);
     }
 
-    // Executa a cada 1 minuto para verificar reservas concluídas
     @Scheduled(fixedRate = 60000)
     public void concluirReservasExpiradas() {
-        StatusReserva statusConcluida = statusReservaRepository.findByNome("Concluída").orElse(null);
+        StatusReserva statusConcluida = statusReservaRepository.findByNome("CONCLUÍDA")
+                .orElseGet(() -> statusReservaRepository.findByNome("Concluída").orElse(null));
+
         if (statusConcluida == null) return;
 
         LocalDateTime agora = LocalDateTime.now();
 
-        List<Reserva> reservasAtivas = reservaRepository.findByStatusReservaNome("Ativa");
+        List<Reserva> reservasAtivas = reservaRepository.findAll().stream()
+                .filter(r -> r.getStatusReserva() != null &&
+                        ("ATIVA".equalsIgnoreCase(r.getStatusReserva().getNome()) ||
+                                "Ativa".equalsIgnoreCase(r.getStatusReserva().getNome())))
+                .toList();
+
         for (Reserva r : reservasAtivas) {
             LocalDateTime fimReserva = LocalDateTime.of(r.getDataFim(), r.getHoraFim());
-            if (agora.isAfter(fimReserva.plusMinutes(1))) {
+            if (agora.isAfter(fimReserva)) {
                 r.setStatusReserva(statusConcluida);
                 reservaRepository.save(r);
             }
         }
     }
 
-    public List<Reserva> pesquisarPorFiltros(String statusNome, Integer usuarioId, Integer laboratorioId, Integer salaId, LocalDate dataInicio, LocalTime horaInicio) {
-        if (statusNome != null && !statusNome.isBlank()) {
-            return reservaRepository.findByStatusReservaNome(statusNome);
-        }
-        if (usuarioId != null) {
-            return reservaRepository.findByUsuarioId(usuarioId);
-        }
-        if (laboratorioId != null) {
-            return reservaRepository.findByLaboratorioId(laboratorioId);
-        }
-        if (salaId != null) {
-            return reservaRepository.findBySalaId(salaId);
-        }
-        if (dataInicio != null) {
-            return reservaRepository.findByDataInicio(dataInicio);
-        }
-        if (horaInicio != null) {
-            return reservaRepository.findByHoraInicio(horaInicio);
-        }
-        return reservaRepository.findAll();
+    public List<Reserva> pesquisarPorFiltros(Integer statusId, Integer usuarioId, Integer laboratorioId,
+                                             Integer salaId, String recursoNome, LocalDate dataInicio,
+                                             LocalDate dataFim, LocalTime horaInicio) {
+        return reservaRepository.pesquisarComFiltros(statusId, usuarioId, laboratorioId, salaId, recursoNome, dataInicio, dataFim, horaInicio);
     }
 }

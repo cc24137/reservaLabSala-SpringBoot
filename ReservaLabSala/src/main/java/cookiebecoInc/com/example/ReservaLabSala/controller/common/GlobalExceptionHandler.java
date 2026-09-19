@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import jakarta.validation.ConstraintViolationException;ok
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,6 +28,22 @@ public class GlobalExceptionHandler
                 .stream()
                 .map(fe -> new ErroCampo(fe.getField(),fe.getDefaultMessage()))
                 .collect(Collectors.toList());
+        return new ErroResposta(
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Erro de validação de campo",
+                listaErros);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErroResposta handleConstraintViolationException(ConstraintViolationException e) {
+        List<ErroCampo> listaErros = e.getConstraintViolations()
+                .stream()
+                .map(cv -> new ErroCampo(
+                        cv.getPropertyPath().toString(),
+                        cv.getMessage()))
+                .collect(Collectors.toList());
+
         return new ErroResposta(
                 HttpStatus.UNPROCESSABLE_ENTITY.value(),
                 "Erro de validação de campo",

@@ -24,6 +24,7 @@ public record   LaboratorioDTO(
         @Size(min = 15, max = 50, message = "Quantidade de caracteres incorreta!")
         String localizacao,
 
+        @NotNull(message = "Campo obrigatório")
         Integer statusRecursoId
 ) {
     public Laboratorio mapearDadosParaEntidadeLaboratorio() {

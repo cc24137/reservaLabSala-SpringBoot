@@ -2,8 +2,6 @@ package cookiebecoInc.com.example.ReservaLabSala.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -16,18 +14,16 @@ public class Reserva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "data_inicio", nullable = false, columnDefinition = "DATE")
+    @Column(name = "data_inicio", nullable = false)
     private LocalDate dataInicio;
 
-    @Column(name = "data_fim", nullable = false, columnDefinition = "DATE")
+    @Column(name = "data_fim", nullable = false)
     private LocalDate dataFim;
 
-    @JdbcTypeCode(SqlTypes.TIME)
-    @Column(name = "hora_inicio", nullable = false, columnDefinition = "TIME")
+    @Column(name = "hora_inicio", nullable = false)
     private LocalTime horaInicio;
 
-    @JdbcTypeCode(SqlTypes.TIME)
-    @Column(name = "hora_fim", nullable = false, columnDefinition = "TIME")
+    @Column(name = "hora_fim", nullable = false)
     private LocalTime horaFim;
 
     @ManyToOne

@@ -1,6 +1,5 @@
 package cookiebecoInc.com.example.ReservaLabSala.controller;
 
-import cookiebecoInc.com.example.ReservaLabSala.controller.dto.LoginDTO;
 import cookiebecoInc.com.example.ReservaLabSala.controller.dto.UsuarioDTO;
 import cookiebecoInc.com.example.ReservaLabSala.model.Usuario;
 import cookiebecoInc.com.example.ReservaLabSala.service.UsuarioService;
@@ -53,12 +52,14 @@ public class UsuarioController {
     }
 
     private UsuarioDTO converterParaDTO(Usuario u) {
-        return new UsuarioDTO(u.getId(), u.getCpf(), u.getNome(), u.getDataAniversario(), u.getCelular(), u.getEmail(), u.getSenha());
-    }
-
-    @PostMapping("/autenticar")
-    public ResponseEntity<Usuario> autenticar(@RequestBody LoginDTO loginDTO) {
-        Usuario usuario = usuarioService.autenticar(loginDTO.email(), loginDTO.senha());
-        return ResponseEntity.ok(usuario);
+        return new UsuarioDTO(
+                u.getId(),
+                u.getCpf(),
+                u.getNome(),
+                u.getDataAniversario(),
+                u.getCelular(),
+                u.getEmail(),
+                u.getSenha()
+        );
     }
 }
