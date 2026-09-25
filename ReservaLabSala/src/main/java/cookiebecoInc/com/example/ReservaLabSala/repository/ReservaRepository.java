@@ -11,12 +11,19 @@ import java.util.List;
 
 public interface ReservaRepository extends JpaRepository<Reserva, Integer> {
 
-    @Query("SELECT r FROM Reserva r WHERE " +
-            "(:statusId IS NULL OR r.statusReserva.id = :statusId) AND " +
-            "(:usuarioId IS NULL OR r.usuario.id = :usuarioId) AND " +
-            "(:laboratorioId IS NULL OR r.laboratorio.id = :laboratorioId) AND " +
-            "(:salaId IS NULL OR r.sala.id = :salaId) AND " +
-            "(:recursoNome IS NULL OR LOWER(r.laboratorio.nome) LIKE LOWER(CONCAT('%', :recursoNome, '%')) OR LOWER(r.sala.nome) LIKE LOWER(CONCAT('%', :recursoNome, '%'))) AND " +
+    @Query("SELECT r FROM Reserva r " +
+            "LEFT JOIN r.laboratorio l " +
+            "LEFT JOIN r.sala s " +
+            "LEFT JOIN r.statusReserva st " +
+            "LEFT JOIN r.usuario u " +
+            "WHERE " +
+            "(:statusId IS NULL OR st.id = :statusId) AND " +
+            "(:usuarioId IS NULL OR u.id = :usuarioId) AND " +
+            "(:laboratorioId IS NULL OR l.id = :laboratorioId) AND " +
+            "(:salaId IS NULL OR s.id = :salaId) AND " +
+            "(:recursoNome IS NULL OR " +
+            " (l.nome IS NOT NULL AND LOWER(l.nome) LIKE LOWER(CONCAT('%', :recursoNome, '%'))) OR " +
+            " (s.nome IS NOT NULL AND LOWER(s.nome) LIKE LOWER(CONCAT('%', :recursoNome, '%')))) AND " +
             "(:dataInicio IS NULL OR r.dataInicio >= :dataInicio) AND " +
             "(:dataFim IS NULL OR r.dataFim <= :dataFim) AND " +
             "(:horaInicio IS NULL OR r.horaInicio >= :horaInicio)")

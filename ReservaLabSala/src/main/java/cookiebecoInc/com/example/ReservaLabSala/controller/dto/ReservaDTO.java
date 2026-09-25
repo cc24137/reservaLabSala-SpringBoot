@@ -5,6 +5,7 @@ import cookiebecoInc.com.example.ReservaLabSala.model.Reserva;
 import cookiebecoInc.com.example.ReservaLabSala.model.Sala;
 import cookiebecoInc.com.example.ReservaLabSala.model.StatusReserva;
 import cookiebecoInc.com.example.ReservaLabSala.model.Usuario;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;

@@ -78,4 +78,15 @@ public class ReservaService {
                                              LocalDate dataFim, LocalTime horaInicio) {
         return reservaRepository.pesquisarComFiltros(statusId, usuarioId, laboratorioId, salaId, recursoNome, dataInicio, dataFim, horaInicio);
     }
+
+    public Reserva salvar (Reserva reserva) {
+        reservaValidator.validar(reserva);
+
+        if (reserva.getStatusReserva() != null && reserva.getStatusReserva().getId() != null) {
+            var status = statusReservaRepository.findById(reserva.getStatusReserva().getId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Status de reserva não encontrado"));
+            reserva.setStatusReserva(status);
+        }
+        return reservaRepository.save(reserva);
+    }
 }
